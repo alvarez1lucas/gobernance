@@ -1,0 +1,29 @@
+2026-05-25 00:29:30,022 | INFO | NumExpr defaulting to 4 threads.
+2026-05-25 00:29:30,518 | INFO | ============================================================
+2026-05-25 00:29:30,518 | INFO | AI Governance Framework — Pipeline start
+2026-05-25 00:29:30,518 | INFO | ============================================================
+2026-05-25 00:29:30,518 | INFO | [1] Cargando Model Risk Register...
+2026-05-25 00:29:30,537 | INFO |     Modelos registrados: 2
+2026-05-25 00:29:30,537 | INFO | [2] Evaluando policies...
+2026-05-25 00:29:30,538 | INFO |     ✅ [MIN_PERFORMANCE_CREDIT] ✓ Gini mínimo para modelos de crédito tier High
+2026-05-25 00:29:30,539 | WARNING |     ⚠️ [DRIFT_WARNING] 
+2026-05-25 00:29:30,539 | WARNING |     ❌ [DRIFT_BREACH] 
+2026-05-25 00:29:30,539 | INFO |     ✅ [FAIRNESS_CREDIT] ✓ Disparate Impact Ratio mínimo regulatorio
+2026-05-25 00:29:30,539 | INFO |     ✅ [VALIDATION_REQUIRED] ✓ Modelos High tier requieren validación independiente
+2026-05-25 00:29:30,539 | INFO |     ✅ [MIN_PERFORMANCE_MARKET] ✓ Zona verde Basel III obligatoria para IMA
+2026-05-25 00:29:30,539 | WARNING |     ⚠️ [DRIFT_WARNING] 
+2026-05-25 00:29:30,540 | WARNING |     ❌ [DRIFT_BREACH] 
+2026-05-25 00:29:30,540 | INFO |     ✅ [VALIDATION_REQUIRED] ✓ Modelos High tier requieren validación independiente
+2026-05-25 00:29:30,540 | INFO |     ✅ [KUPIEC_PASS] ✓ Backtesting estadístico obligatorio para modelos de mercado
+2026-05-25 00:29:30,540 | INFO |     ✅ [CP_COVERAGE] ✓ Cobertura conformal mínima garantizada
+2026-05-25 00:29:30,541 | INFO |     Resultado: 2 BLOCKS | 2 WARNS | 7 PASS
+2026-05-25 00:29:30,541 | INFO | [3] Fairness check (Credit Risk)...
+2026-05-25 00:29:30,541 | INFO |     Fairness overall: ✅ PASS
+2026-05-25 00:29:30,541 | INFO | [4] Cargando audit trail unificado...
+2026-05-25 00:29:30,542 | INFO |     Eventos totales: 7 (credit + market + governance)
+2026-05-25 00:29:30,542 | INFO | [5] Exportando snapshot del MRR...
+2026-05-25 00:29:30,545 | INFO |     Snapshot guardado: reports/mrr_snapshot.json
+2026-05-25 00:29:30,545 | INFO | [6] Registrando evento de governance...
+2026-05-25 00:29:30,547 | INFO | ============================================================
+2026-05-25 00:29:30,547 | ERROR | GOVERNANCE: ❌ FAIL — 2 policies bloqueantes activas
+2026-05-25 00:29:30,547 | ERROR |    Revisar y corregir antes de desplegar modelos en producción

@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-05-25T00:29:30.542474",
+  "n_models": 2,
+  "n_approved": 2,
+  "n_policy_blocks": 2,
+  "n_policy_warns": 2,
+  "models": [
+    {
+      "id": "credit-risk-v2.1",
+      "name": "Credit Scoring \u2014 IFRS 9 PD",
+      "status": "approved",
+      "tier": "High",
+      "sr117_score": 0.88,
+      "psi": 0.06,
+      "next_validation": "2025-07-10",
+      "days_to_next_validation": -319,
+      "n_policy_issues": 2
+    },
+    {
+      "id": "market-var-tft-v1.0",
+      "name": "Market VaR \u2014 Temporal Fusion Transformer",
+      "status": "approved",
+      "tier": "High",
+      "sr117_score": 0.88,
+      "psi": 0.08,
+      "next_validation": "2025-07-15",
+      "days_to_next_validation": -314,
+      "n_policy_issues": 2
+    }
+  ]
+}

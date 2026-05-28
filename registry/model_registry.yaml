@@ -1,0 +1,206 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Model Risk Register (MRR) — AI Governance Framework
+# SR 11-7 (Fed/OCC) · EU AI Act Annex III · Basel III FRTB
+#
+# Este archivo es el inventario oficial de todos los modelos de la organización.
+# Versionado en Git: cada cambio queda auditado con fecha y autor.
+# ══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  version: "1.0"
+  last_updated: "2025-01-15"
+  owner: "Risk Engineering Team"
+  review_frequency: "semiannual"
+  regulations: ["SR_11-7", "EU_AI_Act_Annex_III", "Basel_III_FRTB", "IFRS_9", "BCBS_239", "BCRA_A7724"]
+
+models:
+
+  # ── MODELO 1: Credit Risk ───────────────────────────────────────────────────
+  - id: "credit-risk-v2.1"
+    name: "Credit Scoring — IFRS 9 PD"
+    description: >
+      Pipeline end-to-end de validación de riesgo crediticio bajo SR 11-7.
+      Modelo champion XGBoost con DL tabular, GNNs para riesgo sistémico,
+      fairness, calibración IFRS 9 y explainability SHAP.
+    repo: "github.com/[user]/credit-risk-model-validation"
+    type: "credit_scoring"
+    tier: "High"                        # SR 11-7: High / Medium / Low
+    status: "approved"                  # approved | under_review | pending | retired
+    owner: "Risk Engineering Team"
+    validator: "Independent Validation Unit"
+
+    regulations:
+      - SR_11-7
+      - EU_AI_Act_Art9
+      - BCRA_A7724
+      - IFRS_9
+      - ECOA_Fair_Lending
+
+    eu_ai_act:
+      risk_category: "high_risk"        # Annex III punto 5(b)
+      human_oversight: "required"
+      conformity_assessment: "completed"
+
+    validation:
+      last_date: "2025-01-10"
+      next_date: "2025-07-10"
+      frequency: "semiannual"
+      independent_validator: true
+      sr117_score: 0.88
+
+    metrics:
+      gini: 0.712
+      auc_roc: 0.856
+      ks_statistic: 0.524
+      brier_score: 0.084
+      psi: 0.06                         # < 0.10 OK | 0.10-0.20 warn | > 0.20 breach
+      psi_status: "stable"
+      hl_pvalue: 0.19
+      well_calibrated: true
+
+    fairness:
+      dpd_gender: 0.03                  # < 0.05 regulatorio
+      dir_gender: 0.97                  # > 0.80 regulatorio
+      equalized_odds_tpr_gap: 0.02
+      equalized_odds_fpr_gap: 0.01
+      overall_pass: true
+
+    stress_testing:
+      income_shock_moderate: {gini: 0.672, degradation: 0.04}
+      income_shock_severe:   {gini: 0.632, degradation: 0.08}
+      bureau_deterioration:  {gini: 0.592, degradation: 0.12}
+
+    ifrs9:
+      calibrated: true
+      platt_scaling: true
+      pd_segments: ["PD < 5%", "5-15%", "> 15%"]
+
+    limitations:
+      - "Entrenado en datos 2016-2023 — no cubre hiperinflación post-2024 en LATAM"
+      - "Segmento pymes excluido del scope"
+      - "Revisión manual requerida para probabilidades entre 0.35–0.65 (EU AI Act)"
+      - "GNN de riesgo sistémico opera en modo batch — no real-time"
+
+    retirement_criteria:
+      gini_floor: 0.632                 # validation_gini - 0.08
+      psi_ceiling: 0.25
+      consecutive_months_breach: 3
+
+    mlflow_run_id: "credit-risk-champion-v2.1"
+    artifact_path: "models/champion/model.pkl"
+
+  # ── MODELO 2: Market Risk ───────────────────────────────────────────────────
+  - id: "market-var-tft-v1.0"
+    name: "Market VaR — Temporal Fusion Transformer"
+    description: >
+      Pipeline de estimación de VaR y Expected Shortfall bajo Basel III FRTB.
+      Modelo champion TFT con Pinball Loss, HMM de detección de régimen,
+      sentimiento FinBERT, Conformal Prediction y validación SR 11-7.
+    repo: "github.com/[user]/market-risk-deep-learning"
+    type: "market_risk"
+    tier: "High"
+    status: "approved"
+    owner: "Risk Engineering Team"
+    validator: "Independent Validation Unit"
+
+    regulations:
+      - SR_11-7
+      - Basel_III_FRTB
+      - EU_AI_Act_Annex_III
+      - BCBS_239
+
+    eu_ai_act:
+      risk_category: "high_risk"
+      human_oversight: "required"
+      conformity_assessment: "pending"
+
+    validation:
+      last_date: "2025-01-15"
+      next_date: "2025-07-15"
+      frequency: "semiannual"
+      independent_validator: true
+      sr117_score: 0.88
+
+    metrics:
+      exceedances_250d: 3               # Basel III Traffic Light
+      traffic_light_zone: "green"       # green (0-4) | yellow (5-9) | red (10+)
+      kupiec_pval: 0.38                 # > 0.05 PASS
+      christoffersen_pval: 0.55         # > 0.05 PASS
+      es_975: -0.0182                   # Expected Shortfall 97.5% (Basel III FRTB)
+      psi: 0.08                         # Drift PSI sobre distribución de retornos
+      conformal_coverage: 0.992         # >= 0.99 garantía CP
+
+    regime:
+      current: 1                        # 0=Bull | 1=Normal | 2=Bear | 3=Crisis
+      var_multiplier: 1.0
+      hmm_n_regimes: 4
+
+    stress_testing:
+      gfc_2008:   {es_1d: -0.042, total_loss: -0.61}
+      covid_2020: {es_1d: -0.031, total_loss: -0.38}
+      dfast_adv:  {es_1d: -0.038, total_loss: -0.58}
+      latam_tail: {es_1d: -0.028, total_loss: -0.43}
+
+    limitations:
+      - "Calibrado en datos 2000-2024 — no captura hiperinflación LATAM post-2024"
+      - "Portfolio asumido igual ponderado — no refleja posiciones reales"
+      - "VaR 1-day asume liquidez perfecta"
+      - "Correlaciones pueden cambiar en crisis (correlation breakdown)"
+
+    retirement_criteria:
+      exceedances_ceiling: 9            # Zona roja Basel III
+      psi_ceiling: 0.20
+      kupiec_pval_floor: 0.05
+
+    mlflow_run_id: "market-risk-tft-v1.0"
+    artifact_path: "models/champion/tft_model.ckpt"
+
+# ── POLICIES ACTIVAS ──────────────────────────────────────────────────────────
+policies:
+  - id: "MIN_PERFORMANCE_CREDIT"
+    description: "Gini mínimo para modelos de crédito tier High"
+    rule: "gini >= 0.45"
+    severity: "block"
+    applies_to: ["credit-risk-v2.1"]
+
+  - id: "MIN_PERFORMANCE_MARKET"
+    description: "Zona verde Basel III obligatoria para IMA"
+    rule: "exceedances_250d <= 4"
+    severity: "block"
+    applies_to: ["market-var-tft-v1.0"]
+
+  - id: "DRIFT_WARNING"
+    description: "Alerta de drift moderado"
+    rule: "psi > 0.10"
+    severity: "warn"
+    applies_to: ["credit-risk-v2.1", "market-var-tft-v1.0"]
+
+  - id: "DRIFT_BREACH"
+    description: "Drift severo — re-validación inmediata"
+    rule: "psi > 0.20"
+    severity: "block"
+    applies_to: ["credit-risk-v2.1", "market-var-tft-v1.0"]
+
+  - id: "FAIRNESS_CREDIT"
+    description: "Disparate Impact Ratio mínimo regulatorio"
+    rule: "dir_gender >= 0.80"
+    severity: "block"
+    applies_to: ["credit-risk-v2.1"]
+
+  - id: "VALIDATION_REQUIRED"
+    description: "Modelos High tier requieren validación independiente"
+    rule: "independent_validator == true"
+    severity: "block"
+    applies_to: ["credit-risk-v2.1", "market-var-tft-v1.0"]
+
+  - id: "KUPIEC_PASS"
+    description: "Backtesting estadístico obligatorio para modelos de mercado"
+    rule: "kupiec_pval > 0.05"
+    severity: "block"
+    applies_to: ["market-var-tft-v1.0"]
+
+  - id: "CP_COVERAGE"
+    description: "Cobertura conformal mínima garantizada"
+    rule: "conformal_coverage >= 0.99"
+    severity: "warn"
+    applies_to: ["market-var-tft-v1.0"]
