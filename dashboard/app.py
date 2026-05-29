@@ -259,28 +259,23 @@ st.plotly_chart = _plotly_chart_custom
 def _aplicar_colores_negros(fig):
     if fig is None:
         return fig
-        
-    # 1. Pisar la tipografía global a negro puro (Títulos, leyendas y textos internos)
+    
+    # Pisamos de forma segura el color de la fuente de los ejes y leyendas
+    # sin alterar tamaños, márgenes ni el template original de Streamlit.
     fig.update_layout(
-        font=dict(color="#000000"),
+        legend=dict(font=dict(color="#000000")),
+        title=dict(font=dict(color="#000000"))
+    )
+    
+    # Modifica el color de las etiquetas numéricas de los ejes (los ticks)
+    # que es justamente lo que Streamlit suele poner en gris claro.
+    fig.update_xaxes(
+        tickfont=dict(color="#000000"),
         title_font=dict(color="#000000")
     )
-    
-    # 2. Pisar etiquetas y títulos del eje X de forma aditiva
-    fig.update_xaxes(
-        title_font=dict(color="#000000"), 
-        tickfont=dict(color="#000000")
-    )
-    
-    # 3. Pisar etiquetas y títulos del eje Y
     fig.update_yaxes(
-        title_font=dict(color="#000000"), 
-        tickfont=dict(color="#000000")
-    )
-    
-    # 4. Forzar textos flotantes o anotaciones a negro
-    fig.update_annotations(
-        font=dict(color="#000000")
+        tickfont=dict(color="#000000"),
+        title_font=dict(color="#000000")
     )
     
     return fig
