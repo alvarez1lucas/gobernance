@@ -242,6 +242,19 @@ def t(k):
 LAYOUT = dict(paper_bgcolor="white", plot_bgcolor="#f8fafc",
               margin=dict(t=20,b=15,l=15,r=15))
 
+_plotly_chart_original = st.plotly_chart
+
+# Redefinimos st.plotly_chart para que aplique el color negro y apague el tema gris
+def _plotly_chart_custom(fig, use_container_width=True, **kwargs):
+    # 1. Pasamos el gráfico por tu helper para pintar todo de negro
+    fig = _aplicar_colores_negros(fig)
+    
+    # 2. Lo renderizamos apagando el tema nativo de Streamlit (theme=None)
+    # Esto obliga al servidor de la nube a respetar el negro puro de Plotly
+    return _plotly_chart_original(fig, use_container_width=use_container_width, theme=None, **kwargs)
+
+# Pisamos la función globalmente para todo el script
+st.plotly_chart = _plotly_chart_custom
 
 def _aplicar_colores_negros(fig):
     if fig is None:
@@ -253,7 +266,7 @@ def _aplicar_colores_negros(fig):
         title_font=dict(color="#000000")
     )
     
-    # 2. Pisar etiquetas y títulos del eje X de forma aditiva (no rompe configuraciones previas)
+    # 2. Pisar etiquetas y títulos del eje X de forma aditiva
     fig.update_xaxes(
         title_font=dict(color="#000000"), 
         tickfont=dict(color="#000000")
@@ -265,12 +278,12 @@ def _aplicar_colores_negros(fig):
         tickfont=dict(color="#000000")
     )
     
-    # 4. Forzar textos flotantes o anotaciones (como los "Last" y "Next") a negro
+    # 4. Forzar textos flotantes o anotaciones a negro
     fig.update_annotations(
         font=dict(color="#000000")
     )
     
-    return fig 
+    return fig
     
 def badge(text, color):
     return f'<span class="badge" style="background:{color}20;color:{color}">{text}</span>'
