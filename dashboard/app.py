@@ -41,6 +41,10 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ── Plotly template with black text for web deployment ──────────────────────
+import plotly.io as pio
+pio.templates.default = "plotly_white"
+
 st.markdown("""
 <style>
 [data-testid="stMetricValue"]{ font-size:1.05rem; }
@@ -49,6 +53,12 @@ st.markdown("""
         font-size:11px; font-weight:600; margin:2px; }
 .card{ background:#f8fafc; border-radius:10px; padding:14px 16px;
        border:1px solid #e2e8f0; margin-bottom:8px; }
+/* Plotly text colors — ensure all text is black */
+.plotly text, .plotly g text { fill: black !important; color: black !important; }
+.plotly .xtick text, .plotly .ytick text { fill: black !important; }
+.plotly .xaxislayer text, .plotly .yaxislayer text { fill: black !important; }
+.plotly .legendtext { fill: black !important; }
+.plotly .hovertext { fill: black !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -239,12 +249,12 @@ def t(k):
     return TX[st.session_state.lang].get(k, TX["en"].get(k, k))
 
 # ── Layout helpers ────────────────────────────────────────────────────────────
-LAYOUT = dict(paper_bgcolor="white", plot_bgcolor="#f8fafc",
-              margin=dict(t=20,b=15,l=15,r=15),
-              font=dict(color="black"),
-              title_font_color="black",
-              xaxis_title_font_color="black",
-              yaxis_title_font_color="black")
+LAYOUT = dict(
+    paper_bgcolor="white", 
+    plot_bgcolor="#f8fafc",
+    margin=dict(t=20,b=15,l=15,r=15),
+    font=dict(color="black", size=11),
+)
 
 def badge(text, color):
     return f'<span class="badge" style="background:{color}20;color:{color}">{text}</span>'
@@ -544,7 +554,6 @@ def page_mrr():
             x=list(regs_all.keys()), y=list(regs_all.values()),
             marker_color=["#4361ee","#7209b7","#f72585","#06d6a0","#ffd166","#ef476f"],
             opacity=0.85, text=list(regs_all.values()), textposition="outside",
-            textfont=dict(color="black", size=10),
         ))
         fig2.update_layout(height=220, yaxis_title="Models covered",
                            xaxis_tickangle=-20, **LAYOUT)
@@ -716,14 +725,11 @@ def page_credit():
     with col_a:
         fig3 = go.Figure()
         fig3.add_trace(go.Bar(x=scen_names, y=scen_ginis, marker_color=scen_colors, opacity=0.85,
-                              text=[f"{g:.3f}" for g in scen_ginis], textposition="outside",
-                              textfont=dict(color="black", size=10)))
+                              text=[f"{g:.3f}" for g in scen_ginis], textposition="outside"))
         fig3.add_hline(y=base_gini, line_dash="dash", line_color="#4361ee",
-                       annotation_text=f"Baseline Gini: {base_gini:.3f}",
-                       annotation_font=dict(color="black", size=10))
+                       annotation_text=f"Baseline Gini: {base_gini:.3f}")
         fig3.add_hline(y=0.45, line_dash="dot", line_color="#ef476f",
-                       annotation_text="Floor: 0.45",
-                       annotation_font=dict(color="black", size=10))
+                       annotation_text="Floor: 0.45")
         fig3.update_layout(height=280, yaxis_title="Gini", **LAYOUT)
         st.plotly_chart(fig3, use_container_width=True)
 
@@ -836,11 +842,9 @@ def page_market():
             x=[t("mr_exc")+" Classical", t("mr_exc")+" Conformal"],
             y=[clas_e, conf_e],
             marker_color=["#adb5bd","#4361ee"],opacity=0.85,
-            text=[clas_e,conf_e],textposition="outside",
-            textfont=dict(color="black", size=10)))
+            text=[clas_e,conf_e],textposition="outside"))
         fig3.add_hline(y=4,line_dash="dash",line_color="green",line_width=1.5,
-                       annotation_text="Basel III green zone (≤4)",
-                       annotation_font=dict(color="black", size=10))
+                       annotation_text="Basel III green zone (≤4)")
         fig3.update_layout(height=260,yaxis_title="Exceedances",
                            showlegend=False,**LAYOUT)
         st.plotly_chart(fig3,use_container_width=True)
@@ -929,15 +933,12 @@ def page_comparative():
         x = np.arange(len(categories)); w = 0.3
         fig2.add_trace(go.Bar(x=x-w/2, y=cr_scores, width=w,
                                name="Credit Risk", marker_color="#4361ee", opacity=0.85,
-                               text=[f"{v:.0%}" for v in cr_scores], textposition="outside",
-                               textfont=dict(color="black", size=10)))
+                               text=[f"{v:.0%}" for v in cr_scores], textposition="outside"))
         fig2.add_trace(go.Bar(x=x+w/2, y=mr_scores, width=w,
                                name="Market Risk", marker_color="#7209b7", opacity=0.85,
-                               text=[f"{v:.0%}" for v in mr_scores], textposition="outside",
-                               textfont=dict(color="black", size=10)))
+                               text=[f"{v:.0%}" for v in mr_scores], textposition="outside"))
         fig2.add_hline(y=0.80,line_dash="dash",line_color="#ef476f",line_width=1,
-                       annotation_text="Min 80%",
-                       annotation_font=dict(color="black", size=10))
+                       annotation_text="Min 80%")
         fig2.update_layout(height=350,xaxis=dict(tickvals=list(x),ticktext=categories),
                            yaxis=dict(range=[0,1.15]),
                            legend=dict(orientation="h",y=1.1),**LAYOUT)
@@ -947,14 +948,11 @@ def page_comparative():
         fig3 = go.Figure(go.Bar(
             x=["Credit Risk","Market Risk"],y=[m['psi'],0.08],
             marker_color=["#4361ee","#7209b7"],opacity=0.85,
-            text=[f"{v:.2f}" for v in [m['psi'],0.08]],textposition="outside",
-            textfont=dict(color="black", size=10)))
+            text=[f"{v:.2f}" for v in [m['psi'],0.08]],textposition="outside"))
         fig3.add_hline(y=0.10,line_dash="dash",line_color="#ffd166",
-                       annotation_text="Warn: 0.10",
-                       annotation_font=dict(color="black", size=10))
+                       annotation_text="Warn: 0.10")
         fig3.add_hline(y=0.20,line_dash="dash",line_color="#ef476f",
-                       annotation_text="Block: 0.20",
-                       annotation_font=dict(color="black", size=10))
+                       annotation_text="Block: 0.20")
         fig3.update_layout(height=220,yaxis_title="PSI",showlegend=False,**LAYOUT)
         st.plotly_chart(fig3,use_container_width=True)
 
@@ -990,8 +988,7 @@ def page_fairness():
         rates  = list(ar.values())
         fig = go.Figure(go.Bar(
             x=groups,y=rates,marker_color=["#4361ee","#7209b7"],opacity=0.85,
-            text=[f"{r:.1%}" for r in rates],textposition="outside",
-            textfont=dict(color="black", size=10)))
+            text=[f"{r:.1%}" for r in rates],textposition="outside"))
         fig.add_hline(y=min(rates)/max(rates)*max(rates),line_dash="dot",line_color="#adb5bd",
                       annotation_font=dict(color="black", size=10))
         fig.update_layout(height=280,yaxis_title="Approval rate",
@@ -1024,13 +1021,11 @@ def page_fairness():
         fig2.add_trace(go.Bar(name="TPR",x=["M","F"],y=[m_tpr,f_tpr],
                               marker_color="#4361ee",opacity=0.85,
                               text=[f"{v:.2f}" for v in [m_tpr,f_tpr]],
-                              textposition="outside",
-                              textfont=dict(color="black", size=10)))
+                              textposition="outside"))
         fig2.add_trace(go.Bar(name="FPR",x=["M","F"],y=[m_fpr,f_fpr],
                               marker_color="#ef476f",opacity=0.85,
                               text=[f"{v:.2f}" for v in [m_fpr,f_fpr]],
-                              textposition="outside",
-                              textfont=dict(color="black", size=10)))
+                              textposition="outside"))
         fig2.update_layout(height=280,barmode="group",yaxis_title="Rate",
                            legend=dict(orientation="h",y=1.1),**LAYOUT)
         st.plotly_chart(fig2,use_container_width=True)
@@ -1076,14 +1071,11 @@ def page_stress():
         fig.add_trace(go.Bar(x=names_c,y=ginis_c,
                              marker_color=["#ffd166","#f72585","#ef476f"][:len(names_c)],
                              opacity=0.85,text=[f"{g:.3f}" for g in ginis_c],
-                             textposition="outside",
-                             textfont=dict(color="black", size=10)))
+                             textposition="outside"))
         fig.add_hline(y=base_gini,line_dash="dash",line_color="#4361ee",
-                      annotation_text=f"Baseline {base_gini:.3f}",
-                      annotation_font=dict(color="black", size=10))
+                      annotation_text=f"Baseline {base_gini:.3f}")
         fig.add_hline(y=0.45,line_dash="dot",line_color="#ef476f",
-                      annotation_text="Min floor 0.45",
-                      annotation_font=dict(color="black", size=10))
+                      annotation_text="Min floor 0.45")
         fig.update_layout(height=280,yaxis_title="Gini",**LAYOUT)
         st.plotly_chart(fig,use_container_width=True)
 
@@ -1094,8 +1086,7 @@ def page_stress():
         mr_cols  = ["#ef476f","#f72585","#7209b7","#4361ee","#ff6b35","#06d6a0"]
         fig2 = go.Figure(go.Bar(
             x=mr_names,y=mr_es,marker_color=mr_cols[:len(mr_names)],opacity=0.85,
-            text=[f"{v:.4f}" for v in mr_es],textposition="outside",
-            textfont=dict(color="black", size=10)))
+            text=[f"{v:.4f}" for v in mr_es],textposition="outside"))
         fig2.update_layout(height=280,yaxis_title="ES 97.5% (1-day)",
                            xaxis_tickangle=-25,**LAYOUT)
         st.plotly_chart(fig2,use_container_width=True)
@@ -1118,14 +1109,12 @@ def page_stress():
     for lb,pct in [("VaR 99%",1.0),("ES 97.5%",2.5)]:
         v = np.percentile(pnl,pct)
         fig3.add_vline(x=v,line_dash="dash",line_color="#ef476f",
-                       annotation_text=f"{lb}:{v:.4f}",
-                       annotation_font=dict(color="black", size=10),row=1,col=1)
+                       annotation_text=f"{lb}:{v:.4f}",row=1,col=1)
     fig3.add_trace(go.Histogram(x=gini_stressed,nbinsx=50,histnorm="probability density",
                                 marker_color="#4361ee",opacity=0.6,name="Credit Gini"),
                    row=1,col=2)
     fig3.add_vline(x=0.45,line_dash="dot",line_color="#ef476f",
-                   annotation_text="Floor 0.45",
-                   annotation_font=dict(color="black", size=10),row=1,col=2)
+                   annotation_text="Floor 0.45",row=1,col=2)
     fig3.update_layout(height=300,showlegend=False,**LAYOUT)
     st.plotly_chart(fig3,use_container_width=True)
 
