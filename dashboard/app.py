@@ -240,46 +240,14 @@ def t(k):
 
 # ── Layout helpers ────────────────────────────────────────────────────────────
 LAYOUT = dict(paper_bgcolor="white", plot_bgcolor="#f8fafc",
-              margin=dict(t=20,b=15,l=15,r=15))
+              margin=dict(t=20,b=15,l=15,r=15),
+              font=dict(color="black", family="Arial, sans-serif"),
+              title_font=dict(color="black", size=14),
+              xaxis_title_font=dict(color="black", size=12),
+              yaxis_title_font=dict(color="black", size=12),
+              xaxis_tickfont=dict(color="black", size=10),
+              yaxis_tickfont=dict(color="black", size=10))
 
-_plotly_chart_original = st.plotly_chart
-
-# Redefinimos st.plotly_chart para que aplique el color negro y apague el tema gris
-def _plotly_chart_custom(fig, use_container_width=True, **kwargs):
-    # 1. Pasamos el gráfico por tu helper para pintar todo de negro
-    fig = _aplicar_colores_negros(fig)
-    
-    # 2. Lo renderizamos apagando el tema nativo de Streamlit (theme=None)
-    # Esto obliga al servidor de la nube a respetar el negro puro de Plotly
-    return _plotly_chart_original(fig, use_container_width=use_container_width, theme=None, **kwargs)
-
-# Pisamos la función globalmente para todo el script
-st.plotly_chart = _plotly_chart_custom
-
-def _aplicar_colores_negros(fig):
-    if fig is None:
-        return fig
-    
-    # Pisamos de forma segura el color de la fuente de los ejes y leyendas
-    # sin alterar tamaños, márgenes ni el template original de Streamlit.
-    fig.update_layout(
-        legend=dict(font=dict(color="#000000")),
-        title=dict(font=dict(color="#000000"))
-    )
-    
-    # Modifica el color de las etiquetas numéricas de los ejes (los ticks)
-    # que es justamente lo que Streamlit suele poner en gris claro.
-    fig.update_xaxes(
-        tickfont=dict(color="#000000"),
-        title_font=dict(color="#000000")
-    )
-    fig.update_yaxes(
-        tickfont=dict(color="#000000"),
-        title_font=dict(color="#000000")
-    )
-    
-    return fig
-    
 def badge(text, color):
     return f'<span class="badge" style="background:{color}20;color:{color}">{text}</span>'
 
@@ -536,9 +504,9 @@ def page_mrr():
                 name=m["name"][:20],
             ))
             fig.add_annotation(x=last, y=i, text="Last", showarrow=False,
-                               font=dict(size=9), yshift=15)
+                               font=dict(size=9, color="black"), yshift=15)
             fig.add_annotation(x=nxt, y=i, text="Next", showarrow=False,
-                               font=dict(size=9, color="#ef476f"), yshift=15)
+                               font=dict(size=9, color="black"), yshift=15)
         
         # ── NUEVA ESTRATEGIA EVITA-BUGS: Línea vertical con add_shape ──────────
         today_val = pd.to_datetime(datetime.today().strftime("%Y-%m-%d"))
@@ -556,15 +524,17 @@ def page_mrr():
             x=today_val, y=max(1, n_models - 0.5),
             text="Today",
             showarrow=False,
-            font=dict(color="red", size=10),
+            font=dict(color="black", size=10),
             yshift=10
         )
         # ──────────────────────────────────────────────────────────────────────
                       
         fig.update_layout(height=220, showlegend=True,
                           yaxis=dict(tickvals=list(range(n_models)),
-                                     ticktext=[m["name"][:22] for m in MODELS_DATA]),
-                          legend=dict(orientation="h", y=1.1), **LAYOUT)
+                                     ticktext=[m["name"][:22] for m in MODELS_DATA],
+                                     tickfont=dict(color="black", size=10)),
+                          legend=dict(orientation="h", y=1.1, font=dict(color="black", size=10)),
+                          title_font=dict(color="black"), **LAYOUT)
         st.plotly_chart(fig, use_container_width=True)
 
     with col_r:
@@ -578,9 +548,13 @@ def page_mrr():
             x=list(regs_all.keys()), y=list(regs_all.values()),
             marker_color=["#4361ee","#7209b7","#f72585","#06d6a0","#ffd166","#ef476f"],
             opacity=0.85, text=list(regs_all.values()), textposition="outside",
+            textfont=dict(color="black", size=10),
         ))
         fig2.update_layout(height=220, yaxis_title="Models covered",
-                           xaxis_tickangle=-20, **LAYOUT)
+                           xaxis_tickangle=-20,
+                           yaxis_title_font=dict(color="black", size=12),
+                           yaxis_tickfont=dict(color="black", size=10),
+                           xaxis_tickfont=dict(color="black", size=10), **LAYOUT)
         st.plotly_chart(fig2, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -665,8 +639,9 @@ def page_policy():
         hole=0.55, textinfo="label+value",
     ))
     fig.update_layout(height=260, showlegend=True,
-                      legend=dict(orientation="h", y=-0.1),
-                      paper_bgcolor="white", margin=dict(t=10,b=10,l=10,r=10))
+                      legend=dict(orientation="h", y=-0.1, font=dict(color="black", size=10)),
+                      paper_bgcolor="white", margin=dict(t=10,b=10,l=10,r=10),
+                      font=dict(color="black", family="Arial, sans-serif"))
     col_center = st.columns([1,2,1])[1]
     with col_center:
         st.plotly_chart(fig, use_container_width=True)
@@ -716,7 +691,11 @@ def page_credit():
         fig.add_trace(go.Scatter(x=[0,1], y=[0,1], line=dict(color="#adb5bd", dash="dash"),
                                  name="Random", showlegend=False))
         fig.update_layout(height=330, xaxis_title="FPR", yaxis_title="TPR",
-                          legend=dict(orientation="h", y=1.1), **LAYOUT)
+                          legend=dict(orientation="h", y=1.1, font=dict(color="black", size=10)),
+                          xaxis_title_font=dict(color="black", size=12),
+                          yaxis_title_font=dict(color="black", size=12),
+                          xaxis_tickfont=dict(color="black", size=10),
+                          yaxis_tickfont=dict(color="black", size=10), **LAYOUT)
         st.plotly_chart(fig, use_container_width=True)
 
     with col_r:
@@ -732,8 +711,11 @@ def page_credit():
             marker_color=["#ef476f" if v>0.04 else "#4361ee" for v in feats_s.values()],
             opacity=0.85,
         ))
-        fig2.update_layout(height=330, **LAYOUT, xaxis_title="Mean |SHAP|")
-        fig2.update_layout(margin=dict(t=15, b=15, l=130, r=15))
+        fig2.update_layout(height=330, xaxis_title="Mean |SHAP|",
+                           xaxis_title_font=dict(color="black", size=12),
+                           yaxis_tickfont=dict(color="black", size=10),
+                           xaxis_tickfont=dict(color="black", size=10),
+                           margin=dict(t=15, b=15, l=130, r=15), **LAYOUT)
         
         st.plotly_chart(fig2, use_container_width=True)
     # Stress scenarios
@@ -749,12 +731,18 @@ def page_credit():
     with col_a:
         fig3 = go.Figure()
         fig3.add_trace(go.Bar(x=scen_names, y=scen_ginis, marker_color=scen_colors, opacity=0.85,
-                              text=[f"{g:.3f}" for g in scen_ginis], textposition="outside"))
+                              text=[f"{g:.3f}" for g in scen_ginis], textposition="outside",
+                              textfont=dict(color="black", size=10)))
         fig3.add_hline(y=base_gini, line_dash="dash", line_color="#4361ee",
-                       annotation_text=f"Baseline Gini: {base_gini:.3f}")
+                       annotation_text=f"Baseline Gini: {base_gini:.3f}",
+                       annotation_font=dict(color="black", size=10))
         fig3.add_hline(y=0.45, line_dash="dot", line_color="#ef476f",
-                       annotation_text="Floor: 0.45")
-        fig3.update_layout(height=280, yaxis_title="Gini", **LAYOUT)
+                       annotation_text="Floor: 0.45",
+                       annotation_font=dict(color="black", size=10))
+        fig3.update_layout(height=280, yaxis_title="Gini",
+                           yaxis_title_font=dict(color="black", size=12),
+                           xaxis_tickfont=dict(color="black", size=10),
+                           yaxis_tickfont=dict(color="black", size=10), **LAYOUT)
         st.plotly_chart(fig3, use_container_width=True)
 
     with col_b:
@@ -773,7 +761,11 @@ def page_credit():
                                   line=dict(color="#4361ee", width=1.5)))
         fig4.update_layout(height=280, xaxis_title="Predicted PD",
                            yaxis_title="Observed default rate",
-                           legend=dict(orientation="h", y=1.1), **LAYOUT)
+                           legend=dict(orientation="h", y=1.1, font=dict(color="black", size=10)),
+                           xaxis_title_font=dict(color="black", size=12),
+                           yaxis_title_font=dict(color="black", size=12),
+                           xaxis_tickfont=dict(color="black", size=10),
+                           yaxis_tickfont=dict(color="black", size=10), **LAYOUT)
         st.plotly_chart(fig4, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -836,7 +828,9 @@ def page_market():
                 x=ret.index[-500:][exc_m],y=ret.values[-500:][exc_m],
                 mode="markers",marker=dict(color="red",size=7,symbol="x"),
                 name=f"Exc ({exc_m.sum()})"))
-        fig.update_layout(height=300,legend=dict(orientation="h",y=1.1),**LAYOUT)
+        fig.update_layout(height=300,legend=dict(orientation="h",y=1.1, font=dict(color="black", size=10)),
+                          xaxis_tickfont=dict(color="black", size=10),
+                          yaxis_tickfont=dict(color="black", size=10),**LAYOUT)
         st.plotly_chart(fig,use_container_width=True)
 
     with col_r:
@@ -852,8 +846,9 @@ def page_market():
                 x=sent.index[-500:],y=sent["sentiment_ma21"].values[-500:],
                 line=dict(color="#ef476f",width=1.5,dash="dash"),name="MA21d"))
         fig2.add_hline(y=0,line_color="black",line_width=0.8)
-        fig2.update_layout(height=300,yaxis=dict(range=[-1,1]),
-                           legend=dict(orientation="h",y=1.1),**LAYOUT)
+        fig2.update_layout(height=300,yaxis=dict(range=[-1,1], tickfont=dict(color="black", size=10)),
+                           legend=dict(orientation="h",y=1.1, font=dict(color="black", size=10)),
+                           xaxis_tickfont=dict(color="black", size=10),**LAYOUT)
         st.plotly_chart(fig2,use_container_width=True)
         st.metric("Current sentiment",f"{cur_s:+.3f}",
                   "🟢" if cur_s>0.1 else "🔴" if cur_s<-0.1 else "🟡")
@@ -866,10 +861,15 @@ def page_market():
             x=[t("mr_exc")+" Classical", t("mr_exc")+" Conformal"],
             y=[clas_e, conf_e],
             marker_color=["#adb5bd","#4361ee"],opacity=0.85,
-            text=[clas_e,conf_e],textposition="outside"))
+            text=[clas_e,conf_e],textposition="outside",
+            textfont=dict(color="black", size=10)))
         fig3.add_hline(y=4,line_dash="dash",line_color="green",line_width=1.5,
-                       annotation_text="Basel III green zone (≤4)")
+                       annotation_text="Basel III green zone (≤4)",
+                       annotation_font=dict(color="black", size=10))
         fig3.update_layout(height=260,yaxis_title="Exceedances",
+                           yaxis_title_font=dict(color="black", size=12),
+                           xaxis_tickfont=dict(color="black", size=10),
+                           yaxis_tickfont=dict(color="black", size=10),
                            showlegend=False,**LAYOUT)
         st.plotly_chart(fig3,use_container_width=True)
     with col_b:
@@ -887,7 +887,8 @@ def page_market():
             hole=0.5,textinfo="label+percent"))
         fig4.update_layout(height=260,showlegend=False,paper_bgcolor="white",
                            margin=dict(t=10,b=10,l=10,r=10),
-                           title=dict(text=t("mr_regime"),font=dict(size=13)))
+                           title=dict(text=t("mr_regime"),font=dict(size=13, color="black")),
+                           font=dict(color="black"))
         st.plotly_chart(fig4,use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -943,9 +944,10 @@ def page_comparative():
                                       fill="toself",name="Market Risk",
                                       line=dict(color="#7209b7",width=2),
                                       fillcolor="rgba(114,9,183,0.15)"))
-        fig.update_layout(height=350,polar=dict(radialaxis=dict(range=[0,1])),
-                          legend=dict(orientation="h",y=1.1),
-                          paper_bgcolor="white",margin=dict(t=20,b=20,l=20,r=20))
+        fig.update_layout(height=350,polar=dict(radialaxis=dict(range=[0,1], tickfont=dict(color="black", size=10))),
+                          legend=dict(orientation="h",y=1.1, font=dict(color="black", size=10)),
+                          paper_bgcolor="white",margin=dict(t=20,b=20,l=20,r=20),
+                          font=dict(color="black"))
         st.plotly_chart(fig,use_container_width=True)
 
     with col_r:
@@ -957,27 +959,37 @@ def page_comparative():
         x = np.arange(len(categories)); w = 0.3
         fig2.add_trace(go.Bar(x=x-w/2, y=cr_scores, width=w,
                                name="Credit Risk", marker_color="#4361ee", opacity=0.85,
-                               text=[f"{v:.0%}" for v in cr_scores], textposition="outside"))
+                               text=[f"{v:.0%}" for v in cr_scores], textposition="outside",
+                               textfont=dict(color="black", size=10)))
         fig2.add_trace(go.Bar(x=x+w/2, y=mr_scores, width=w,
                                name="Market Risk", marker_color="#7209b7", opacity=0.85,
-                               text=[f"{v:.0%}" for v in mr_scores], textposition="outside"))
+                               text=[f"{v:.0%}" for v in mr_scores], textposition="outside",
+                               textfont=dict(color="black", size=10)))
         fig2.add_hline(y=0.80,line_dash="dash",line_color="#ef476f",line_width=1,
-                       annotation_text="Min 80%")
-        fig2.update_layout(height=350,xaxis=dict(tickvals=list(x),ticktext=categories),
-                           yaxis=dict(range=[0,1.15]),
-                           legend=dict(orientation="h",y=1.1),**LAYOUT)
+                       annotation_text="Min 80%",
+                       annotation_font=dict(color="black", size=10))
+        fig2.update_layout(height=350,xaxis=dict(tickvals=list(x),ticktext=categories, tickfont=dict(color="black", size=10)),
+                           yaxis=dict(range=[0,1.15], tickfont=dict(color="black", size=10)),
+                           legend=dict(orientation="h",y=1.1, font=dict(color="black", size=10)),**LAYOUT)
         st.plotly_chart(fig2,use_container_width=True)
 
         st.subheader(t("co_drift"))
         fig3 = go.Figure(go.Bar(
             x=["Credit Risk","Market Risk"],y=[m['psi'],0.08],
             marker_color=["#4361ee","#7209b7"],opacity=0.85,
-            text=[f"{v:.2f}" for v in [m['psi'],0.08]],textposition="outside"))
+            text=[f"{v:.2f}" for v in [m['psi'],0.08]],textposition="outside",
+            textfont=dict(color="black", size=10)))
         fig3.add_hline(y=0.10,line_dash="dash",line_color="#ffd166",
-                       annotation_text="Warn: 0.10")
+                       annotation_text="Warn: 0.10",
+                       annotation_font=dict(color="black", size=10))
         fig3.add_hline(y=0.20,line_dash="dash",line_color="#ef476f",
-                       annotation_text="Block: 0.20")
-        fig3.update_layout(height=220,yaxis_title="PSI",showlegend=False,**LAYOUT)
+                       annotation_text="Block: 0.20",
+                       annotation_font=dict(color="black", size=10))
+        fig3.update_layout(height=220,yaxis_title="PSI",
+                           yaxis_title_font=dict(color="black", size=12),
+                           xaxis_tickfont=dict(color="black", size=10),
+                           yaxis_tickfont=dict(color="black", size=10),
+                           showlegend=False,**LAYOUT)
         st.plotly_chart(fig3,use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1012,10 +1024,15 @@ def page_fairness():
         rates  = list(ar.values())
         fig = go.Figure(go.Bar(
             x=groups,y=rates,marker_color=["#4361ee","#7209b7"],opacity=0.85,
-            text=[f"{r:.1%}" for r in rates],textposition="outside"))
-        fig.add_hline(y=min(rates)/max(rates)*max(rates),line_dash="dot",line_color="#adb5bd")
+            text=[f"{r:.1%}" for r in rates],textposition="outside",
+            textfont=dict(color="black", size=10)))
+        fig.add_hline(y=min(rates)/max(rates)*max(rates),line_dash="dot",line_color="#adb5bd",
+                      annotation_font=dict(color="black", size=10))
         fig.update_layout(height=280,yaxis_title="Approval rate",
-                          yaxis=dict(range=[0,1]),showlegend=False,**LAYOUT)
+                          yaxis=dict(range=[0,1], tickfont=dict(color="black", size=10)),
+                          yaxis_title_font=dict(color="black", size=12),
+                          xaxis_tickfont=dict(color="black", size=10),
+                          showlegend=False,**LAYOUT)
         st.plotly_chart(fig,use_container_width=True)
 
         st.subheader(t("fa_threshold"))
@@ -1044,13 +1061,18 @@ def page_fairness():
         fig2.add_trace(go.Bar(name="TPR",x=["M","F"],y=[m_tpr,f_tpr],
                               marker_color="#4361ee",opacity=0.85,
                               text=[f"{v:.2f}" for v in [m_tpr,f_tpr]],
-                              textposition="outside"))
+                              textposition="outside",
+                              textfont=dict(color="black", size=10)))
         fig2.add_trace(go.Bar(name="FPR",x=["M","F"],y=[m_fpr,f_fpr],
                               marker_color="#ef476f",opacity=0.85,
                               text=[f"{v:.2f}" for v in [m_fpr,f_fpr]],
-                              textposition="outside"))
+                              textposition="outside",
+                              textfont=dict(color="black", size=10)))
         fig2.update_layout(height=280,barmode="group",yaxis_title="Rate",
-                           legend=dict(orientation="h",y=1.1),**LAYOUT)
+                           yaxis_title_font=dict(color="black", size=12),
+                           xaxis_tickfont=dict(color="black", size=10),
+                           yaxis_tickfont=dict(color="black", size=10),
+                           legend=dict(orientation="h",y=1.1, font=dict(color="black", size=10)),**LAYOUT)
         st.plotly_chart(fig2,use_container_width=True)
 
         # Distribution plot
@@ -1065,7 +1087,10 @@ def page_fairness():
                 x=s[mask],nbinsx=50,histnorm="probability density",
                 name=f"Gender {g}",marker_color=col_hex,opacity=0.6))
         fig3.update_layout(height=280,barmode="overlay",xaxis_title="Predicted PD",
-                           legend=dict(orientation="h",y=1.1),**LAYOUT)
+                           xaxis_title_font=dict(color="black", size=12),
+                           xaxis_tickfont=dict(color="black", size=10),
+                           yaxis_tickfont=dict(color="black", size=10),
+                           legend=dict(orientation="h",y=1.1, font=dict(color="black", size=10)),**LAYOUT)
         st.plotly_chart(fig3,use_container_width=True)
 
     st.info(t("fa_market_note"))
@@ -1094,12 +1119,18 @@ def page_stress():
         fig.add_trace(go.Bar(x=names_c,y=ginis_c,
                              marker_color=["#ffd166","#f72585","#ef476f"][:len(names_c)],
                              opacity=0.85,text=[f"{g:.3f}" for g in ginis_c],
-                             textposition="outside"))
+                             textposition="outside",
+                             textfont=dict(color="black", size=10)))
         fig.add_hline(y=base_gini,line_dash="dash",line_color="#4361ee",
-                      annotation_text=f"Baseline {base_gini:.3f}")
+                      annotation_text=f"Baseline {base_gini:.3f}",
+                      annotation_font=dict(color="black", size=10))
         fig.add_hline(y=0.45,line_dash="dot",line_color="#ef476f",
-                      annotation_text="Min floor 0.45")
-        fig.update_layout(height=280,yaxis_title="Gini",**LAYOUT)
+                      annotation_text="Min floor 0.45",
+                      annotation_font=dict(color="black", size=10))
+        fig.update_layout(height=280,yaxis_title="Gini",
+                           yaxis_title_font=dict(color="black", size=12),
+                           xaxis_tickfont=dict(color="black", size=10),
+                           yaxis_tickfont=dict(color="black", size=10),**LAYOUT)
         st.plotly_chart(fig,use_container_width=True)
 
     with col_r:
@@ -1109,8 +1140,12 @@ def page_stress():
         mr_cols  = ["#ef476f","#f72585","#7209b7","#4361ee","#ff6b35","#06d6a0"]
         fig2 = go.Figure(go.Bar(
             x=mr_names,y=mr_es,marker_color=mr_cols[:len(mr_names)],opacity=0.85,
-            text=[f"{v:.4f}" for v in mr_es],textposition="outside"))
+            text=[f"{v:.4f}" for v in mr_es],textposition="outside",
+            textfont=dict(color="black", size=10)))
         fig2.update_layout(height=280,yaxis_title="ES 97.5% (1-day)",
+                           yaxis_title_font=dict(color="black", size=12),
+                           xaxis_tickfont=dict(color="black", size=10),
+                           yaxis_tickfont=dict(color="black", size=10),
                            xaxis_tickangle=-25,**LAYOUT)
         st.plotly_chart(fig2,use_container_width=True)
 
@@ -1132,13 +1167,19 @@ def page_stress():
     for lb,pct in [("VaR 99%",1.0),("ES 97.5%",2.5)]:
         v = np.percentile(pnl,pct)
         fig3.add_vline(x=v,line_dash="dash",line_color="#ef476f",
-                       annotation_text=f"{lb}:{v:.4f}",row=1,col=1)
+                       annotation_text=f"{lb}:{v:.4f}",
+                       annotation_font=dict(color="black", size=10),row=1,col=1)
     fig3.add_trace(go.Histogram(x=gini_stressed,nbinsx=50,histnorm="probability density",
                                 marker_color="#4361ee",opacity=0.6,name="Credit Gini"),
                    row=1,col=2)
     fig3.add_vline(x=0.45,line_dash="dot",line_color="#ef476f",
-                   annotation_text="Floor 0.45",row=1,col=2)
-    fig3.update_layout(height=300,showlegend=False,**LAYOUT)
+                   annotation_text="Floor 0.45",
+                   annotation_font=dict(color="black", size=10),row=1,col=2)
+    fig3.update_layout(height=300,showlegend=False,
+                       xaxis_tickfont=dict(color="black", size=10),
+                       yaxis_tickfont=dict(color="black", size=10),
+                       xaxis_title_font=dict(color="black", size=12),
+                       yaxis_title_font=dict(color="black", size=12),**LAYOUT)
     st.plotly_chart(fig3,use_container_width=True)
 
     c1,c2,c3 = st.columns(3)
@@ -1284,17 +1325,18 @@ def page_audit():
                                     dash="solid" if ok else "dot"))
             fig.add_annotation(x=i-0.5,y=0.38,
                                text=f"{e.get('hash','')[:6]}...",
-                               showarrow=False,font=dict(size=7,color="#6b7280"))
+                               showarrow=False,font=dict(size=7,color="black"))
     # Legend
     for src,col_hex,lbl in [("credit","#4361ee","Credit"),("market","#7209b7","Market"),("governance","#06d6a0","Governance")]:
         fig.add_trace(go.Scatter(x=[None],y=[None],mode="markers",
                                  marker=dict(size=12,color=col_hex),name=lbl))
     fig.update_layout(
         height=200,paper_bgcolor="white",plot_bgcolor="white",
-        showlegend=True,legend=dict(orientation="h",y=1.15,x=0),
+        showlegend=True,legend=dict(orientation="h",y=1.15,x=0, font=dict(color="black", size=10)),
         xaxis=dict(showgrid=False,showticklabels=False,zeroline=False),
         yaxis=dict(showgrid=False,showticklabels=False,zeroline=False,range=[-0.5,0.9]),
-        margin=dict(t=10,b=10,l=10,r=10))
+        margin=dict(t=10,b=10,l=10,r=10),
+        font=dict(color="black"))
     st.plotly_chart(fig,use_container_width=True)
     st.caption(
         "Each block is SHA-256 hashed including the previous hash. Any modification breaks the chain." if st.session_state.lang=="en" else
