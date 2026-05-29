@@ -239,8 +239,14 @@ def t(k):
     return TX[st.session_state.lang].get(k, TX["en"].get(k, k))
 
 # ── Layout helpers ────────────────────────────────────────────────────────────
-LAYOUT = dict(paper_bgcolor="white", plot_bgcolor="#f8fafc",
-              margin=dict(t=20,b=15,l=15,r=15))
+LAYOUT = dict(
+    paper_bgcolor="white", 
+    plot_bgcolor="#f8fafc",
+    margin=dict(t=20, b=15, l=15, r=15),
+    font=dict(color="#000000"),  # Forzar texto de leyendas, anotaciones y etiquetas generales a negro
+    xaxis=dict(title=dict(font=dict(color="#000000")), tickfont=dict(color="#000000")), # Eje X negro
+    yaxis=dict(title=dict(font=dict(color="#000000")), tickfont=dict(color="#000000"))  # Eje Y negro
+)
 
 def badge(text, color):
     return f'<span class="badge" style="background:{color}20;color:{color}">{text}</span>'
