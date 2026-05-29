@@ -242,6 +242,36 @@ def t(k):
 LAYOUT = dict(paper_bgcolor="white", plot_bgcolor="#f8fafc",
               margin=dict(t=20,b=15,l=15,r=15))
 
+
+def _aplicar_colores_negros(fig):
+    if fig is None:
+        return fig
+        
+    # 1. Pisar la tipografía global a negro puro (Títulos, leyendas y textos internos)
+    fig.update_layout(
+        font=dict(color="#000000"),
+        title_font=dict(color="#000000")
+    )
+    
+    # 2. Pisar etiquetas y títulos del eje X de forma aditiva (no rompe configuraciones previas)
+    fig.update_xaxes(
+        title_font=dict(color="#000000"), 
+        tickfont=dict(color="#000000")
+    )
+    
+    # 3. Pisar etiquetas y títulos del eje Y
+    fig.update_yaxes(
+        title_font=dict(color="#000000"), 
+        tickfont=dict(color="#000000")
+    )
+    
+    # 4. Forzar textos flotantes o anotaciones (como los "Last" y "Next") a negro
+    fig.update_annotations(
+        font=dict(color="#000000")
+    )
+    
+    return fig 
+    
 def badge(text, color):
     return f'<span class="badge" style="background:{color}20;color:{color}">{text}</span>'
 
