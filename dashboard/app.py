@@ -1133,33 +1133,59 @@ def page_stress():
     fig3.add_trace(go.Histogram(x=pnl,nbinsx=100,histnorm="probability density",
                                 marker_color="#7209b7",opacity=0.6,
                                 name="Market P&L"), row=1,col=1)
-    for lb,pct in [("VaR 99%",1.0),("ES 97.5%",2.5)]:
-        v = np.percentile(pnl,pct)
-        fig3.add_vline(x=v,line_dash="dash",line_color="#ef476f",
-                       annotation_text=f"{lb}:{v:.4f}",
-                       annotation_font=dict(color="#1a1a1a",size=9),
-                       row=1,col=1)
+    
+    # ── LINEAS VERTICALES LIMPIAS (Sin anotaciones nativas para que no se bugueen) ──
+    v_var = np.percentile(pnl, 1.0)
+    v_es = np.percentile(pnl, 2.5)
+    
+    fig3.add_vline(x=v_var, line_dash="dash", line_color="#ef476f", row=1, col=1)
+    fig3.add_vline(x=v_es, line_dash="dash", line_color="#ef476f", row=1, col=1)
+                       
     fig3.add_trace(go.Histogram(x=gini_stressed,nbinsx=50,histnorm="probability density",
                                 marker_color="#4361ee",opacity=0.6,
                                 name="Credit Gini"), row=1,col=2)
-    fig3.add_vline(x=0.45,line_dash="dot",line_color="#ef476f",
-                   annotation_text="Floor 0.45",
-                   annotation_font=dict(color="#1a1a1a",size=9),
-                   row=1,col=2)
+                                
+    # El Floor del Credit Risk (Línea limpia)
+    fig3.add_vline(x=0.45, line_dash="dot", line_color="#ef476f", row=1, col=2)
+                   
+    # ── ANOTACIONES MANUALES BLINDADAS CON YREF='PAPER' ───────────────────────
+    # Columna 1: Market Risk (Escalonamos las alturas manualmente entre 0 y 1)
+    fig3.add_annotation(x=v_var, y=0.90, yref="paper", xref="x1",
+                        text=f"VaR 99%:{v_var:.4f}",
+                        showarrow=False, font=dict(color="#1a1a1a", size=8.5),
+                        xanchor="left", yanchor="top")
+
+    fig3.add_annotation(x=v_es, y=0.78, yref="paper", xref="x1",
+                        text=f"ES 97.5%:{v_es:.4f}",
+                        showarrow=False, font=dict(color="#1a1a1a", size=8.5),
+                        xanchor="left", yanchor="top")
+
+    # Columna 2: Credit Risk Floor
+    fig3.add_annotation(x=0.45, y=0.90, yref="paper", xref="x2",
+                        text="Floor 0.45",
+                        showarrow=False, font=dict(color="#1a1a1a", size=8.5),
+                        xanchor="left", yanchor="top")
+   
+                   
+    
     fig3.update_layout(height=300, paper_bgcolor="white", plot_bgcolor="#f8fafc",
                        showlegend=False,
                        title=dict(text=""),
                        font=dict(color="#1a1a1a"),
-                       margin=dict(t=35,b=20,l=20,r=20))
+                       margin=dict(t=55,b=20,l=20,r=20))
+                       
     fig3.update_xaxes(tickfont=dict(color="#1a1a1a"),
                       title_font=dict(color="#1a1a1a"),
                       gridcolor="#e5e7eb")
     fig3.update_yaxes(tickfont=dict(color="#1a1a1a"),
                       title_font=dict(color="#1a1a1a"),
                       gridcolor="#e5e7eb")
-    # Fix: subplot_titles son anotaciones — forzar color negro
-    fig3.update_annotations(font=dict(color="#1a1a1a", size=12))
+                      
+    
+    fig3.update_annotations(font=dict(color="#1a1a1a", size=11))
+    
     st.plotly_chart(fig3, use_container_width=True)
+
 
     c1,c2,c3 = st.columns(3)
     c1.metric("Market VaR 99%",  f"{np.percentile(pnl,1):.5f}")
