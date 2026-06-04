@@ -526,12 +526,26 @@ def page_mrr():
             text="Today", showarrow=False,
             font=dict(size=9, color="#ef476f", family="Arial"))
         apply_layout(fig, height=220,
-                     yaxis=dict(tickvals=[0,1],
-                                ticktext=[m["name"][:24] for m in MODELS],
-                                tickfont=dict(color="#1a1a1a"),
-                                title_font=dict(color="#1a1a1a")),
-                     legend=dict(orientation="h",y=1.15,font=dict(color="#1a1a1a")),
-                     showlegend=True)
+                     yaxis=dict(
+                         tickvals=[0, 1],
+                         ticktext=[m["name"][:24] for m in MODELS],
+                         tickfont=dict(color="#1a1a1a"),
+                         range=[-0.8, 1.8], # Espacio extra para que no se encimen
+                         fixedrange=True
+                     ),
+                     xaxis=dict(
+                         fixedrange=True
+                     ),
+                     legend=dict(
+                         orientation="h",
+                         yanchor="bottom",
+                         y=1.10, # Ajuste para que no tape los nombres
+                         font=dict(color="#1a1a1a")
+                     ),
+                     margin=dict(t=60, b=20, l=10, r=10),
+                     showlegend=True
+        )
+        
         st.plotly_chart(fig, use_container_width=True)
 
     with col_r:
