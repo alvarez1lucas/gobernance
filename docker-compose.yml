@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  ai-governance:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai_governance_framework
+    ports:
+      - "8501:8501"
+    volumes:
+      # Permite actualizar reportes locales o el YAML sin necesidad de reconstruir la imagen para desarrollo
+      - ./registry:/app/registry
+      - ./reports:/app/reports
+      - ./dashboard:/app/dashboard
+    environment:
+      - ENV=development
+    restart: unless-stopped
